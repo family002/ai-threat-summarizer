@@ -76,3 +76,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 // Severity: High
 // Impact Summary: Potential unauthorized code execution or data exfiltration (summary).
 // Mitigation: Apply vendor patch, restrict execution privileges, and monitor for suspicious activity.
+
+//Testing:
+// CVE-2025-14567: An information disclosure issue in WidgetPro 1.3 allows local users to view temporary log files containing debug information. Attackers require local access to exploit this vulnerability.
+// CVE-2025-18792: A SQL injection vulnerability in the search function of ShopEase 2.1 allows remote attackers to execute arbitrary SQL commands via crafted input in the query parameter.
+// CVE-2025-22010: Buffer overflow in the image processing module of SecureScan 5.0 allows remote attackers to execute arbitrary code via a crafted PNG file.
+// CVE-2025-30100: Authentication bypass in CloudPanel 3.8 allows attackers to gain administrative access by manipulating session tokens.
+// CVE-2025-40150: A race condition in DataSync 2.0 can cause denial of service when multiple sync requests occur simultaneously. Exploitation requires authenticated network access.
