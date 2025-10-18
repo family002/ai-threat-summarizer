@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { ThreatReport } from "../types/threat";
 import ThreatResult from "../components/ThreatResult";
 
+// useState hooks for input, output, and loading state
 export default function Home() {
   const [input, setInput] = useState<string>("")
   const [result, setResult] = useState<ThreatReport | null>(null);
@@ -11,6 +12,8 @@ export default function Home() {
     setInput(e.target.value);
   }
 
+  //Mock analysis function (used when API isn't available)
+  //Demonstrates typed functions and logic inference
   const mockParse = (text: string): ThreatReport => {
     const lower = text.toLowerCase();
     const attackVector = 
@@ -35,6 +38,7 @@ export default function Home() {
     };
   };
 
+  // Calls the API route to analyze the input text
   const handleAnalyze = async (): Promise<void> => {
     if (!input.trim()) {
       alert("Please paste a report or CVE description.");
@@ -62,18 +66,8 @@ export default function Home() {
       setLoading(false);
     }
 
-      // simulate async work (replace with real fetch in Hour 3)
-    //   await new Promise((r) => setTimeout(r, 700));
-    //   const parsed = mockParse(input);
-    //   setResult(parsed);
-    // } catch (err) {
-    //   console.error("Analyze error:", err);
-    //   alert("Something went wrong. See console for details.");
-    // } finally {
-    //   setLoading(false);
-    // }
   };
-
+  //JSX layout
   return (
     <main className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-2xl bg-white shadow-md rounded-2xl p-8">
@@ -96,7 +90,6 @@ export default function Home() {
           {loading ? "Analyzing..." : "Analyze Threat"}
         </button>
 
-        {/* show last input snippet */}
         {result && (
           <>
             <div className="mt-4 text-xs text-gray-500">Preview: {result.raw}</div>

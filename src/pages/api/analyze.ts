@@ -2,23 +2,23 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import OpenAI from "openai";
 import type { ThreatReport } from "../../types/threat";
 
+// Initialize OpenAI
 const client = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(
-    req: NextApiRequest,
-    res: NextApiResponse
-) {
-    if (req.method !== "POST") {
-        return res.status(405).json({ error: "Method Not allowed" });
+// Threat Analyzer - stores raw text input, sends it to OpenAI API, and returns analysis
+class ThreatAnalyzer {
+    text: string;
+    constructor(text: string) {
+        this.text = text;
     }
 
-    const { text } = req.body;
-    if (!text || typeof text !== "string") {
-        return res.status(400).json({ error: "Missing or invalid input text."});
+    private classifyRisk(level: string, vector: string): [string, string]{
+        return [level, vector];
     }
 
+    async analyze(): Promise<ThreatReport>{
     const prompt = `
     Analyze the following cybersecurity report or CVE description and extract:
 
@@ -30,28 +30,42 @@ export default async function handler(
     Respond in JSON with keys: attackVector, severity, impact, mitigation.
 
     Report:
-    """${text}"""
+    """${this.text}"""
     `;
     try {
-    const completion = await client.responses.create({
-      model: "gpt-4o-mini",
-      input: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
-      text: {
-        format: "json", // ✅ Updated syntax for structured output
-      },
+        const completion = await client.responses.create({
+        model: "gpt-4o-mini",
+        input: [{ role: "user", content: prompt,}],
+        text: { format: { type: "json_object" } },
     });
         
-        const outputText = completion.output_text;
-        const data: ThreatReport = JSON.parse(outputText);
-        res.status(200).json(data);
-    } catch (err: any) {
-        console.error("API error:", err);
-        res.status(500).json({ error: "Failed to analyze threat report." })
+    const data: ThreatReport = JSON.parse(completion.output_text);
+    const [severity, vector] = this.classifyRisk(data.severity, data.attackVector);
+    console.log("Classified Risk Tuple:", [severity, vector]);
+
+    return data;
+    } catch (error:any) {
+        console.error("API error:", error);
+        throw new Error("Failed to analyze threat report.");
+    }
+    }
+}
+
+// API Handler - processes POST requests
+export default async function handler(req: NextApiRequest, res: NextApiResponse){
+    if (req.method !== "POST") {
+        return res.status(405).json({ error: "Method Not Allowed"});
+    }
+    const { text } = req.body;
+    if (!text || typeof text !== "string") {
+        return res.status(400).json({ error: "Missing or invalid input text"});
+    }
+    const analyzer = new ThreatAnalyzer(text);
+    try{
+        const report = await analyzer.analyze();
+        return res.status(200).json(report);
+    } catch (err: any){
+        res.status(500).json({ error: err.message });
     }
 }
 

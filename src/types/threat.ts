@@ -1,3 +1,4 @@
+// Define ThreatReport types & Interface along with additional context
 export type Severity = "Low" | "Medium" | "High" | "Critical";
 
 export interface ThreatReport {
